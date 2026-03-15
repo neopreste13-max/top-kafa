@@ -32,10 +32,10 @@ export default class TutorialScene extends Phaser.Scene {
   private dingSound!: Phaser.Sound.BaseSound
   private buttonClickSound!: Phaser.Sound.BaseSound
   
-  // Input
-  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
-  private wasdKeys!: { W: Phaser.Input.Keyboard.Key, A: Phaser.Input.Keyboard.Key, S: Phaser.Input.Keyboard.Key, D: Phaser.Input.Keyboard.Key }
-  private spaceKey!: Phaser.Input.Keyboard.Key
+  // Input (nullable for mobile)
+  private cursors: Phaser.Types.Input.Keyboard.CursorKeys | null = null
+  private wasdKeys: { W: Phaser.Input.Keyboard.Key, A: Phaser.Input.Keyboard.Key, S: Phaser.Input.Keyboard.Key, D: Phaser.Input.Keyboard.Key } | null = null
+  private spaceKey: Phaser.Input.Keyboard.Key | null = null
 
   constructor() {
     super({ key: "TutorialScene" })
@@ -133,7 +133,7 @@ export default class TutorialScene extends Phaser.Scene {
     }).setDepth(51)
     
     // Continue prompt
-    this.continueText = this.add.text(centerX, screenSize.height.value - 80, "Press ENTER to continue", {
+    this.continueText = this.add.text(centerX, screenSize.height.value - 80, "Tap to continue", {
       fontSize: "20px",
       fontFamily: "RetroPixel",
       color: "#44ff44",
@@ -141,29 +141,45 @@ export default class TutorialScene extends Phaser.Scene {
       strokeThickness: 3
     }).setOrigin(0.5).setDepth(51).setVisible(false)
     
-    // Skip tutorial
-    this.add.text(screenSize.width.value - 20, 20, "Press ESC to skip", {
-      fontSize: "14px",
+    // Skip tutorial button (touch-friendly)
+    const skipBtn = this.add.text(screenSize.width.value - 20, 20, "SKIP ✕", {
+      fontSize: "18px",
       fontFamily: "RetroPixel",
-      color: "#888888"
-    }).setOrigin(1, 0).setDepth(51)
+      color: "#ff6666",
+      backgroundColor: "#000000",
+      padding: { x: 10, y: 5 }
+    }).setOrigin(1, 0).setDepth(51).setInteractive()
+    
+    skipBtn.on('pointerdown', () => {
+      this.endTutorial()
+    })
   }
 
   private setupInput(): void {
-    this.cursors = this.input.keyboard!.createCursorKeys()
-    this.wasdKeys = this.input.keyboard!.addKeys("W,A,S,D") as any
-    this.spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+    // Keyboard input (with null check for mobile)
+    if (this.input.keyboard) {
+      this.cursors = this.input.keyboard.createCursorKeys()
+      this.wasdKeys = this.input.keyboard.addKeys("W,A,S,D") as any
+      this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+      
+      const enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
+      enterKey.on("down", () => {
+        if (this.isStepComplete) {
+          this.nextStep()
+        }
+      })
+      
+      const escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+      escKey.on("down", () => {
+        this.endTutorial()
+      })
+    }
     
-    const enterKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER)
-    enterKey.on("down", () => {
+    // Touch input for mobile - tap anywhere to continue
+    this.input.on('pointerdown', () => {
       if (this.isStepComplete) {
         this.nextStep()
       }
-    })
-    
-    const escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
-    escKey.on("down", () => {
-      this.endTutorial()
     })
   }
 
@@ -177,44 +193,48 @@ export default class TutorialScene extends Phaser.Scene {
       {
         title: "WELCOME TO HEAD SOCCER!",
         description: "Let's learn the basics. This tutorial will teach you how to play.",
-        keys: "Press ENTER to continue",
+        keys: "Tap or press ENTER to continue",
         action: () => {},
         checkComplete: () => true
       },
       {
         title: "MOVEMENT",
-        description: "Use A and D keys (or Arrow Left/Right) to move your player.",
-        keys: "Press A/D or ←/→",
+        description: "Use on-screen buttons or A/D keys to move your player.",
+        keys: "Use ◀ ▶ buttons",
         action: () => {},
         checkComplete: () => {
-          return this.wasdKeys.A.isDown || this.wasdKeys.D.isDown || this.cursors.left!.isDown || this.cursors.right!.isDown
+          const keyboardInput = this.wasdKeys?.A?.isDown || this.wasdKeys?.D?.isDown || 
+                               this.cursors?.left?.isDown || this.cursors?.right?.isDown
+          return keyboardInput || false
         }
       },
       {
         title: "JUMPING",
-        description: "Press W (or Arrow Up) to jump. Jumping helps you reach high balls!",
-        keys: "Press W or ↑",
+        description: "Press the UP button or W key to jump. Jumping helps you reach high balls!",
+        keys: "Use ▲ button",
         action: () => {},
         checkComplete: () => {
-          return this.wasdKeys.W.isDown || this.cursors.up!.isDown
+          const keyboardInput = this.wasdKeys?.W?.isDown || this.cursors?.up?.isDown
+          return keyboardInput || false
         }
       },
       {
         title: "KICKING",
-        description: "Press SPACE to kick the ball. Face the ball for a proper kick!",
-        keys: "Press SPACE",
+        description: "Press the KICK button or SPACE to kick the ball!",
+        keys: "Use KICK button",
         action: () => {},
         checkComplete: () => {
-          return this.spaceKey.isDown
+          return this.spaceKey?.isDown || false
         }
       },
       {
         title: "SLIDE TACKLE",
-        description: "Press S (or Arrow Down) to slide tackle. This can stun opponents!",
-        keys: "Press S or ↓",
+        description: "Press DOWN button or S key to slide tackle. This can stun opponents!",
+        keys: "Use ▼ button",
         action: () => {},
         checkComplete: () => {
-          return this.wasdKeys.S.isDown || this.cursors.down!.isDown
+          const keyboardInput = this.wasdKeys?.S?.isDown || this.cursors?.down?.isDown
+          return keyboardInput || false
         }
       },
       {
@@ -241,7 +261,7 @@ export default class TutorialScene extends Phaser.Scene {
       {
         title: "READY TO PLAY!",
         description: "You've learned all the basics! Now go score some goals!",
-        keys: "Press ENTER to start playing",
+        keys: "Tap or press ENTER to start playing",
         action: () => {},
         checkComplete: () => true
       }
@@ -307,15 +327,15 @@ export default class TutorialScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    // Get keyboard input with null checks
+    const keyA = this.wasdKeys?.A?.isDown || false
+    const keyD = this.wasdKeys?.D?.isDown || false
+    const keyW = this.wasdKeys?.W?.isDown || false
+    const keyS = this.wasdKeys?.S?.isDown || false
+    const keySpace = this.spaceKey?.isDown || false
+    
     // Update player
-    this.player.update(
-      delta,
-      this.wasdKeys.A.isDown,
-      this.wasdKeys.D.isDown,
-      this.wasdKeys.W.isDown,
-      this.wasdKeys.S.isDown,
-      this.spaceKey.isDown
-    )
+    this.player.update(delta, keyA, keyD, keyW, keyS, keySpace)
     
     // Update ball
     this.ball.update()

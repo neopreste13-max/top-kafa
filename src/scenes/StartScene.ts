@@ -440,13 +440,16 @@ export default class StartScene extends Phaser.Scene {
   }
 
   private setupInput(): void {
-    const escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
-    escKey.on('down', () => {
-      if (this.currentMenu !== "main") {
-        this.showMainMenu()
-        this.buttonClickSound.play()
-      }
-    })
+    // Keyboard input (with null check for mobile)
+    if (this.input.keyboard) {
+      const escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+      escKey.on('down', () => {
+        if (this.currentMenu !== "main") {
+          this.showMainMenu()
+          this.buttonClickSound.play()
+        }
+      })
+    }
   }
 
   private startGame(): void {

@@ -21,6 +21,12 @@ const config: Phaser.Types.Core.GameConfig = {
   dom: {
     createContainer: true,
   },
+  input: {
+    activePointers: 3, // Support multi-touch
+    touch: {
+      capture: true
+    }
+  },
   physics: {
     default: "arcade",
     arcade: {

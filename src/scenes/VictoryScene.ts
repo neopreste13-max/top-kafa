@@ -410,17 +410,20 @@ export default class VictoryScene extends Phaser.Scene {
   }
 
   private setupInput(): void {
-    // R key to restart
-    const rKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R)
-    rKey.on('down', () => {
-      this.restartGame()
-    })
-    
-    // ESC key to go back to menu
-    const escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
-    escKey.on('down', () => {
-      this.backToMenu()
-    })
+    // Keyboard input (with null check for mobile)
+    if (this.input.keyboard) {
+      // R key to restart
+      const rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R)
+      rKey.on('down', () => {
+        this.restartGame()
+      })
+      
+      // ESC key to go back to menu
+      const escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+      escKey.on('down', () => {
+        this.backToMenu()
+      })
+    }
   }
 
   private restartGame(): void {
