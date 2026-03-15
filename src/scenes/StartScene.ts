@@ -423,20 +423,25 @@ export default class StartScene extends Phaser.Scene {
   }
 
   private setupAudio(): void {
-    this.backgroundMusic = this.sound.add("soccer_theme", {
-      volume: audioConfig.musicVolume.value,
-      loop: true
-    })
-    
-    this.buttonClickSound = this.sound.add("button_click", {
-      volume: audioConfig.sfxVolume.value * 0.5
-    })
-    
-    this.gameStartSound = this.sound.add("game_start", {
-      volume: audioConfig.sfxVolume.value
-    })
-    
-    this.backgroundMusic.play()
+    try {
+      this.backgroundMusic = this.sound.add("soccer_theme", {
+        volume: audioConfig.musicVolume.value,
+        loop: true
+      })
+      
+      this.buttonClickSound = this.sound.add("button_click", {
+        volume: audioConfig.sfxVolume.value * 0.5
+      })
+      
+      this.gameStartSound = this.sound.add("game_start", {
+        volume: audioConfig.sfxVolume.value
+      })
+      
+      // Try to play background music (may fail on mobile without user interaction)
+      this.backgroundMusic.play()
+    } catch (error) {
+      console.warn("Audio setup error (normal on mobile):", error)
+    }
   }
 
   private setupInput(): void {

@@ -6,6 +6,22 @@ import VictoryScene from "./scenes/VictoryScene"
 import TutorialScene from "./scenes/TutorialScene"
 import { screenSize, debugConfig, renderConfig } from "./gameConfig.json"
 
+// Global error handler for debugging mobile issues
+window.onerror = function(message, source, lineno, colno, error) {
+  console.error("Global error:", message, source, lineno, colno, error)
+  // Show error on screen for mobile debugging
+  const errorDiv = document.createElement('div')
+  errorDiv.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:10px;z-index:9999;font-size:12px;'
+  errorDiv.textContent = `Error: ${message} at ${source}:${lineno}`
+  document.body.appendChild(errorDiv)
+  return false
+}
+
+// Unhandled promise rejection handler
+window.onunhandledrejection = function(event) {
+  console.error("Unhandled promise rejection:", event.reason)
+}
+
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: screenSize.width.value,
