@@ -8,6 +8,7 @@ import { PowerUpManager, PowerUp } from "../PowerUp"
 import { ComboSystem } from "../ComboSystem"
 import { EffectsManager } from "../EffectsManager"
 import GameManager from "../GameManager"
+import { MobileControls } from "../MobileControls"
 import { screenSize, fieldConfig, gameConfig, audioConfig } from "../gameConfig.json"
 
 export default class GameScene extends Phaser.Scene {
@@ -49,6 +50,10 @@ export default class GameScene extends Phaser.Scene {
   private spaceKey!: Phaser.Input.Keyboard.Key
   private shiftKey!: Phaser.Input.Keyboard.Key
   private pKey!: Phaser.Input.Keyboard.Key
+  
+  // Mobile controls
+  private mobileControls!: MobileControls
+  private isMobile = false
   
   // Sounds
   private backgroundMusic!: Phaser.Sound.BaseSound
@@ -269,12 +274,23 @@ export default class GameScene extends Phaser.Scene {
   }
 
   private setupInput(): void {
-    // Create input keys
+    // Check if mobile device
+    this.isMobile = MobileControls.isMobileDevice()
+    console.log(`📱 Mobile device detected: ${this.isMobile}`)
+    
+    // Create keyboard input keys (always available)
     this.cursors = this.input.keyboard!.createCursorKeys()
     this.wasdKeys = this.input.keyboard!.addKeys("W,A,S,D") as any
     this.spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
     this.shiftKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
     this.pKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P)
+    
+    // Create mobile controls (for touch devices)
+    this.mobileControls = new MobileControls(this)
+    
+    // Show mobile controls based on device type (or always show for testing)
+    // For production, you may want: this.mobileControls.setVisible(this.isMobile)
+    this.mobileControls.setVisible(true) // Always show for testing
     
     // Pause/resume functionality
     this.pKey.on("down", () => {
@@ -900,18 +916,21 @@ export default class GameScene extends Phaser.Scene {
     // Update combo system
     this.comboSystem.update()
     
+    // Get mobile input state
+    const mobileInput = this.mobileControls.inputState
+    
     // Update players
     if (this.gameMode === "1v1" || this.gameMode === "tournament") {
-      // Player 1 (WASD + Space)
+      // Player 1 (WASD + Space + Mobile controls)
       this.player1.update(delta, 
-        this.wasdKeys.A.isDown, 
-        this.wasdKeys.D.isDown, 
-        this.wasdKeys.W.isDown, 
-        this.wasdKeys.S.isDown, 
-        this.spaceKey.isDown
+        this.wasdKeys.A.isDown || mobileInput.left, 
+        this.wasdKeys.D.isDown || mobileInput.right, 
+        this.wasdKeys.W.isDown || mobileInput.up, 
+        this.wasdKeys.S.isDown || mobileInput.down, 
+        this.spaceKey.isDown || mobileInput.kick
       )
       
-      // Player 2 (Arrow keys + Shift)
+      // Player 2 (Arrow keys + Shift) - No mobile controls for player 2 in 1v1
       this.player2.update(delta, 
         this.cursors.left!.isDown, 
         this.cursors.right!.isDown, 
@@ -920,13 +939,13 @@ export default class GameScene extends Phaser.Scene {
         this.shiftKey.isDown
       )
     } else {
-      // Player 1 vs AI
+      // Player 1 vs AI (Mobile controls + Keyboard)
       this.player1.update(delta, 
-        this.wasdKeys.A.isDown, 
-        this.wasdKeys.D.isDown, 
-        this.wasdKeys.W.isDown, 
-        this.wasdKeys.S.isDown, 
-        this.spaceKey.isDown
+        this.wasdKeys.A.isDown || mobileInput.left, 
+        this.wasdKeys.D.isDown || mobileInput.right, 
+        this.wasdKeys.W.isDown || mobileInput.up, 
+        this.wasdKeys.S.isDown || mobileInput.down, 
+        this.spaceKey.isDown || mobileInput.kick
       )
       
       // AI controls player 2
