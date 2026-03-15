@@ -278,37 +278,38 @@ export default class GameScene extends Phaser.Scene {
     this.isMobile = MobileControls.isMobileDevice()
     console.log(`📱 Mobile device detected: ${this.isMobile}`)
     
-    // Create keyboard input keys (always available)
-    this.cursors = this.input.keyboard!.createCursorKeys()
-    this.wasdKeys = this.input.keyboard!.addKeys("W,A,S,D") as any
-    this.spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
-    this.shiftKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
-    this.pKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P)
+    // Create keyboard input keys (with null check for mobile devices)
+    if (this.input.keyboard) {
+      this.cursors = this.input.keyboard.createCursorKeys()
+      this.wasdKeys = this.input.keyboard.addKeys("W,A,S,D") as any
+      this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+      this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
+      this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P)
+      
+      // Pause/resume functionality
+      this.pKey.on("down", () => {
+        if (this.gameUI.isPaused()) {
+          this.resumeGame()
+        } else {
+          this.pauseGame()
+        }
+      })
+      
+      // ESC to go back to main menu
+      const escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+      escKey.on("down", () => {
+        if (this.isGameActive) {
+          this.backgroundMusic.stop()
+          this.scene.start("StartScene")
+        }
+      })
+    }
     
     // Create mobile controls (for touch devices)
     this.mobileControls = new MobileControls(this)
     
-    // Show mobile controls based on device type (or always show for testing)
-    // For production, you may want: this.mobileControls.setVisible(this.isMobile)
-    this.mobileControls.setVisible(true) // Always show for testing
-    
-    // Pause/resume functionality
-    this.pKey.on("down", () => {
-      if (this.gameUI.isPaused()) {
-        this.resumeGame()
-      } else {
-        this.pauseGame()
-      }
-    })
-    
-    // ESC to go back to main menu
-    const escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
-    escKey.on("down", () => {
-      if (this.isGameActive) {
-        this.backgroundMusic.stop()
-        this.scene.start("StartScene")
-      }
-    })
+    // Show mobile controls based on device type
+    this.mobileControls.setVisible(this.isMobile)
   }
 
   private setupAudio(): void {
@@ -925,33 +926,47 @@ export default class GameScene extends Phaser.Scene {
       kick: false
     }
     
+    // Get keyboard input state (with null checks)
+    const keyboardInput = {
+      p1Left: this.wasdKeys?.A?.isDown || false,
+      p1Right: this.wasdKeys?.D?.isDown || false,
+      p1Up: this.wasdKeys?.W?.isDown || false,
+      p1Down: this.wasdKeys?.S?.isDown || false,
+      p1Kick: this.spaceKey?.isDown || false,
+      p2Left: this.cursors?.left?.isDown || false,
+      p2Right: this.cursors?.right?.isDown || false,
+      p2Up: this.cursors?.up?.isDown || false,
+      p2Down: this.cursors?.down?.isDown || false,
+      p2Kick: this.shiftKey?.isDown || false
+    }
+    
     // Update players
     if (this.gameMode === "1v1" || this.gameMode === "tournament") {
       // Player 1 (WASD + Space + Mobile controls)
       this.player1.update(delta, 
-        this.wasdKeys.A.isDown || mobileInput.left, 
-        this.wasdKeys.D.isDown || mobileInput.right, 
-        this.wasdKeys.W.isDown || mobileInput.up, 
-        this.wasdKeys.S.isDown || mobileInput.down, 
-        this.spaceKey.isDown || mobileInput.kick
+        keyboardInput.p1Left || mobileInput.left, 
+        keyboardInput.p1Right || mobileInput.right, 
+        keyboardInput.p1Up || mobileInput.up, 
+        keyboardInput.p1Down || mobileInput.down, 
+        keyboardInput.p1Kick || mobileInput.kick
       )
       
       // Player 2 (Arrow keys + Shift) - No mobile controls for player 2 in 1v1
       this.player2.update(delta, 
-        this.cursors.left!.isDown, 
-        this.cursors.right!.isDown, 
-        this.cursors.up!.isDown, 
-        this.cursors.down!.isDown, 
-        this.shiftKey.isDown
+        keyboardInput.p2Left, 
+        keyboardInput.p2Right, 
+        keyboardInput.p2Up, 
+        keyboardInput.p2Down, 
+        keyboardInput.p2Kick
       )
     } else {
       // Player 1 vs AI (Mobile controls + Keyboard)
       this.player1.update(delta, 
-        this.wasdKeys.A.isDown || mobileInput.left, 
-        this.wasdKeys.D.isDown || mobileInput.right, 
-        this.wasdKeys.W.isDown || mobileInput.up, 
-        this.wasdKeys.S.isDown || mobileInput.down, 
-        this.spaceKey.isDown || mobileInput.kick
+        keyboardInput.p1Left || mobileInput.left, 
+        keyboardInput.p1Right || mobileInput.right, 
+        keyboardInput.p1Up || mobileInput.up, 
+        keyboardInput.p1Down || mobileInput.down, 
+        keyboardInput.p1Kick || mobileInput.kick
       )
       
       // AI controls player 2
