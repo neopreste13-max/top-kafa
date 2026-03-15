@@ -916,8 +916,14 @@ export default class GameScene extends Phaser.Scene {
     // Update combo system
     this.comboSystem.update()
     
-    // Get mobile input state
-    const mobileInput = this.mobileControls.inputState
+    // Get mobile input state (with null check)
+    const mobileInput = this.mobileControls?.inputState || {
+      left: false,
+      right: false,
+      up: false,
+      down: false,
+      kick: false
+    }
     
     // Update players
     if (this.gameMode === "1v1" || this.gameMode === "tournament") {
