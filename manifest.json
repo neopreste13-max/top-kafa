@@ -1,0 +1,56 @@
+{
+  "name": "Top Kafa - Arcade Soccer",
+  "short_name": "Top Kafa",
+  "description": "Fun arcade soccer game with big-head cartoon characters! Play 1v1 against friends or AI. Compete in tournaments, unlock power-ups, and score amazing goals!",
+  "start_url": "/https://top-kafa.vercel.app/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#1a1a2e",
+  "theme_color": "#4488ff",
+  "categories": [
+    "games",
+    "sports"
+  ],
+  "icons": [
+    {
+      "src": "https://cdn-game-mcp.gambo.ai/bacdc5f2-868a-4958-9b2b-577c7375d7b4/images/app_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-game-mcp.gambo.ai/bacdc5f2-868a-4958-9b2b-577c7375d7b4/images/app_icon_512.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-game-mcp.gambo.ai/bacdc5f2-868a-4958-9b2b-577c7375d7b4/images/app_icon_512.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-game-mcp.gambo.ai/bacdc5f2-868a-4958-9b2b-577c7375d7b4/images/app_icon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://cdn-game-mcp.gambo.ai/bacdc5f2-868a-4958-9b2b-577c7375d7b4/images/app_icon_512.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://cdn-game-mcp.gambo.ai/69f3ec48-6714-4deb-aa8f-018e99e960ef/images/soccer_field_background.png",
+      "sizes": "1536x1024",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Intense 1v1 soccer action"
+    }
+  ],
+  "prefer_related_applications": false
+}
